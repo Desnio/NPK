@@ -42,3 +42,5 @@
 /build-*/
 
 *.npk
+
+compile_commands.json
