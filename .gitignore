@@ -44,3 +44,5 @@
 *.npk
 
 compile_commands.json
+
+imgui.ini
