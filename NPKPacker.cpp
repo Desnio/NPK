@@ -49,7 +49,7 @@ std::vector<char> readFile(const std::filesystem::path& path)
     return buffer;
 }
 
-void packFolder(const std::filesystem::path& folderPath, int compression_level, int max_archive_size)
+void packFolder(const std::filesystem::path& folderPath, const std::filesystem::path& root_Path, int compression_level, int max_archive_size)
 {
     max_archive_size *= 1000 * 1000;
 
@@ -60,7 +60,7 @@ void packFolder(const std::filesystem::path& folderPath, int compression_level, 
         if(!entry.is_regular_file() || entry.path().filename() == ".DS_Store")
             continue;
 
-        auto relative = std::filesystem::relative(entry.path(), folderPath);
+        auto relative = std::filesystem::relative(entry.path(), root_Path);
         std::string relativeStr = relative.generic_string();
 
         auto dataUncompressed = readFile(entry.path());
@@ -147,11 +147,11 @@ void packFolder(const std::filesystem::path& folderPath, int compression_level, 
 
 int main(int argc, char** argv)
 {
-    if (argc != 4)
+    if (argc != 5)
     {
-        std::cout << "Usage: ./NXPKPacker <input_folder> <compression level> <max archive size>\n";
+        std::cout << "Usage: ./NXPKPacker <input_folder> <root path> <compression level> <max archive size>\n";
         return 1;
     }
 
-    packFolder(argv[1], std::stoi(argv[2]), std::stoi(argv[3]));
+    packFolder(argv[1], argv[2], std::stoi(argv[3]), std::stoi(argv[4]));
 }
