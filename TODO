@@ -1,0 +1,1 @@
+Make the packer not store file data until all files have been read, write the data and remove it immediately
