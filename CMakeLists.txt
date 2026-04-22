@@ -1,17 +1,16 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(NPKProject LANGUAGES CXX C)
+project(NPK LANGUAGES CXX C)
 
 option(Build_NPK "Build renderer" ON)
 option(Build_NPKPacker "Build packer tool" ON)
+option(Build_NPKUnpacker "Build unpacker" ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 99)
 
 find_package(lz4 CONFIG REQUIRED)
-# ========================
-# NPKPacker (Tool)
-# ========================
+
 if(Build_NPKPacker)
 
     add_executable(NPKPacker NPKPacker.cpp)
@@ -22,9 +21,6 @@ if(Build_NPKPacker)
 
 endif()
 
-# ========================
-# NPK (OpenGL App)
-# ========================
 if(Build_NPK)
 
     find_package(glfw3 CONFIG REQUIRED)
@@ -53,6 +49,8 @@ if(Build_NPK)
     target_link_libraries(imgui PUBLIC glfw)
     target_link_libraries(NPKLoader PUBLIC lz4::lz4)
 
+    target_compile_definitions(NPKLoader PRIVATE NPK_BUILD)
+
     add_executable(NPK NPK.cpp)
 
     target_include_directories(NPK PUBLIC include)
@@ -64,5 +62,14 @@ if(Build_NPK)
         imgui
         NPKLoader
     )
+
+endif()
+
+if(Build_NPKUnpacker)
+    add_executable(NPKUnpacker NPKLoader.cpp)
+
+    target_include_directories(NPKUnpacker PUBLIC include)
+
+    target_link_libraries(NPKUnpacker PUBLIC lz4::lz4)
 
 endif()

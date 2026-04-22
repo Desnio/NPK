@@ -1,36 +1,37 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "imgui.h"
-#include "imgui_impl_opengl3.h"
 #include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
-#include <iostream>
 #include <filesystem>
+#include <iostream>
 
 #include "NPKLoader.hpp"
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-GLFWwindow* initialise();
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+GLFWwindow *initialise();
 
-int main()
+int
+main()
 {
-    GLFWwindow* window = initialise();
+    GLFWwindow *window = initialise();
 
     std::vector<std::string> files;
-    std::vector<const char*> items;
+    std::vector<const char *> items;
     std::vector<std::string> paks;
-    std::vector<const char*> pakI;
+    std::vector<const char *> pakI;
 
-    for(auto& file : std::filesystem::directory_iterator("."))
+    for(auto &file : std::filesystem::directory_iterator("."))
     {
         if(std::filesystem::is_directory(file.path()))
         {
             files.push_back(file.path().relative_path().string());
         }
-
     }
 
-    for(auto& file : std::filesystem::recursive_directory_iterator(".", std::filesystem::directory_options::skip_permission_denied))
+    for(auto &file : std::filesystem::recursive_directory_iterator(
+            ".", std::filesystem::directory_options::skip_permission_denied))
     {
         if(file.path().filename() == "Pak_dir.npk")
         {
@@ -38,12 +39,12 @@ int main()
         }
     }
 
-    for(auto& file : files)
+    for(auto &file : files)
     {
         items.push_back(file.c_str());
     }
 
-    for(auto& pak : paks)
+    for(auto &pak : paks)
     {
         pakI.push_back(pak.c_str());
     }
@@ -53,7 +54,7 @@ int main()
 
     std::unique_ptr<NPK> npk;
 
-    while (!glfwWindowShouldClose(window))
+    while(!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -74,7 +75,7 @@ int main()
 
         if(ImGui::Button("Archive folder"))
         {
-        //    NPKPacker.PackFolder(items[current], 12, 300);
+            //    NPKPacker.PackFolder(items[current], 12, 300);
         }
 
         ImGui::End();
@@ -93,12 +94,14 @@ int main()
     return 0;
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void
+framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
 
-GLFWwindow* initialise()
+GLFWwindow *
+initialise()
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -109,10 +112,11 @@ GLFWwindow* initialise()
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-    GLFWmonitor* mon = glfwGetPrimaryMonitor();
-    const GLFWvidmode* mod = glfwGetVideoMode(mon);
-    GLFWwindow* window = glfwCreateWindow(mod->width, mod->height, "NPK", NULL, NULL);
-    if (window == NULL)
+    GLFWmonitor *mon = glfwGetPrimaryMonitor();
+    const GLFWvidmode *mod = glfwGetVideoMode(mon);
+    GLFWwindow *window
+        = glfwCreateWindow(mod->width, mod->height, "NPK", NULL, NULL);
+    if(window == NULL)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -120,7 +124,7 @@ GLFWwindow* initialise()
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
+    if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
     }
@@ -131,7 +135,7 @@ GLFWwindow* initialise()
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init();
