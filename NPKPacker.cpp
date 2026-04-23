@@ -1,21 +1,4 @@
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <vector>
-
-#include "lz4.h"
-#include "lz4hc.h"
-
-struct FileEntry {
-    uint64_t offset;
-    uint32_t size;
-    uint32_t originalsize;
-    uint16_t pathsize;
-    uint16_t archivepathsize;
-    std::string path;
-    std::string archivepath;
-};
+#include "NPKPacker.hpp"
 
 std::vector<char>
 readFile(const std::filesystem::path &path)
@@ -53,6 +36,7 @@ packFolder(const std::filesystem::path &folderPath,
            const std::filesystem::path &root_Path, int compression_level,
            int max_archive_size)
 {
+    std::cout << folderPath.generic_string() << std::endl;
     max_archive_size *= 1000 * 1000;
 
     std::vector<FileEntry> files;
@@ -67,10 +51,11 @@ packFolder(const std::filesystem::path &folderPath,
     for(auto &entry :
         std::filesystem::recursive_directory_iterator(folderPath))
     {
+        std::cout << entry.path().generic_string() << std::endl;
         if(!entry.is_regular_file() || entry.path().filename() == ".DS_Store")
             continue;
 
-        auto relative = std::filesystem::relative(entry.path(), root_Path);
+        auto relative = std::filesystem::relative(entry.path(), ".");
         std::string relativeStr = relative.generic_string();
 
         auto dataUncompressed = readFile(entry.path());
@@ -143,10 +128,12 @@ packFolder(const std::filesystem::path &folderPath,
         Pak_dir.write(reinterpret_cast<const char *>(&file.archivepathsize),
                       sizeof(file.archivepathsize));
         Pak_dir.write(file.path.data(), file.path.size());
+        std::cout << file.path << std::endl;
         Pak_dir.write(file.archivepath.data(), file.archivepath.size());
     }
 }
 
+#ifndef NPK_BUILD
 int
 main(int argc, char **argv)
 {
@@ -161,3 +148,4 @@ main(int argc, char **argv)
 
     return 0;
 }
+#endif

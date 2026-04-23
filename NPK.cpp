@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "NPKLoader.hpp"
+#include "NPKPacker.hpp"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 GLFWwindow *initialise();
@@ -22,7 +23,7 @@ main()
     std::vector<std::string> paks;
     std::vector<const char *> pakI;
 
-    for(auto &file : std::filesystem::directory_iterator("."))
+    for(auto &file : std::filesystem::directory_iterator("./"))
     {
         if(std::filesystem::is_directory(file.path()))
         {
@@ -31,7 +32,7 @@ main()
     }
 
     for(auto &file : std::filesystem::recursive_directory_iterator(
-            ".", std::filesystem::directory_options::skip_permission_denied))
+            "./", std::filesystem::directory_options::skip_permission_denied))
     {
         if(file.path().filename() == "Pak_dir.npk")
         {
@@ -66,16 +67,40 @@ main()
         ImGui::Begin("Create archives");
 
         ImGui::Combo("Folders", &current, items.data(), items.size());
+
+        if(ImGui::Button("Archive folder"))
+        {
+            std::filesystem::path fp = files[current];
+            packFolder(fp, "root", 12, 300);
+        }
+
+        ImGui::End();
+
+        ImGui::Begin("Unpack Archive");
+
         ImGui::Combo("Pak_dir", &current_dir, pakI.data(), pakI.size());
 
         if(ImGui::Button("Load Pak_dir"))
         {
             npk = std::make_unique<NPK>(paks[current_dir]);
-        }
+            auto files = npk->get_Files();
+            for(auto file : *files)
+            {
+                std::cout << file.path << std::endl;
+                auto data = npk->LoadFile(file.path);
 
-        if(ImGui::Button("Archive folder"))
-        {
-            //    NPKPacker.PackFolder(items[current], 12, 300);
+                std::filesystem::path filePath(file.path);
+                if(filePath.has_parent_path())
+                {
+                    std::filesystem::create_directories(
+                        filePath.parent_path());
+                }
+
+                std::ofstream of(file.path);
+                of.write(data->data(), data->size());
+                of.close();
+            }
+            std::cout << files->size() << std::endl;
         }
 
         ImGui::End();

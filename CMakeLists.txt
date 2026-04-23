@@ -41,15 +41,19 @@ if(Build_NPK)
     )
     
     add_library(NPKLoader STATIC NPKLoader.cpp)
+    add_library(NPKPackerlib STATIC NPKPacker.cpp)
 
     target_include_directories(NPKLoader PUBLIC include)
+    target_include_directories(NPKPackerlib PUBLIC include)
     target_include_directories(imgui PUBLIC include)
     target_include_directories(glad PUBLIC include)
 
     target_link_libraries(imgui PUBLIC glfw)
     target_link_libraries(NPKLoader PUBLIC lz4::lz4)
+    target_link_libraries(NPKPackerlib PUBLIC lz4::lz4)
 
     target_compile_definitions(NPKLoader PRIVATE NPK_BUILD)
+    target_compile_definitions(NPKPackerlib PRIVATE NPK_BUILD)
 
     add_executable(NPK NPK.cpp)
 
@@ -61,6 +65,7 @@ if(Build_NPK)
         glad
         imgui
         NPKLoader
+        NPKPackerlib
     )
 
 endif()
