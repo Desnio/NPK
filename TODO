@@ -1,1 +1,1 @@
-Make the packer not store file data until all files have been read, write the data and remove it immediately
+Change the loader to only store max 200 open archives
