@@ -2,10 +2,8 @@
 
 #if defined(_WIN32)
 
-#include <windows.h>
-
 void
-mapFile(std::string archivepath)
+NPK::mapFile(const std::string &archivepath)
 {
     archives.back().file
         = CreateFileA(archivepath.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL,
@@ -13,7 +11,7 @@ mapFile(std::string archivepath)
 
     LARGE_INTEGER fileSize;
     GetFileSizeEx(archives.back().file, &fileSize);
-    archvies.back().size = static_cast<size_t>(fileSize.QuadPart);
+    archives.back().size = static_cast<size_t>(fileSize.QuadPart);
 
     archives.back().mapping = CreateFileMappingA(archives.back().file, NULL,
                                                  PAGE_READONLY, 0, 0, NULL);
@@ -27,7 +25,7 @@ mapFile(std::string archivepath)
 }
 
 void
-unMap()
+NPK::unMap()
 {
     for(auto &archive : archives)
     {

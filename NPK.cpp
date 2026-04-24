@@ -36,7 +36,7 @@ main()
     {
         if(file.path().filename() == "Pak_dir.npk")
         {
-            paks.push_back(file.path());
+            paks.push_back(file.path().string());
         }
     }
 

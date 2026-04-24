@@ -9,6 +9,12 @@
 
 #include "lz4.h"
 
+#ifdef _WIN32
+
+#include <windows.h>
+
+#endif
+
 struct archive
 {
     off_t size;
