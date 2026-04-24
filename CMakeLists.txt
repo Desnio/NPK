@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 99)
 
 find_package(lz4 CONFIG REQUIRED)
+find_package(unofficial-sodium CONFIG REQUIRED)
 
 if(Build_NPKPacker)
 
@@ -18,6 +19,7 @@ if(Build_NPKPacker)
     target_include_directories(NPKPacker PUBLIC include)
 
     target_link_libraries(NPKPacker PUBLIC lz4::lz4)
+    target_link_libraries(NPKPacker PUBLIC unofficial-sodium::sodium)
 
 endif()
 
@@ -51,6 +53,8 @@ if(Build_NPK)
     target_link_libraries(imgui PUBLIC glfw)
     target_link_libraries(NPKLoader PUBLIC lz4::lz4)
     target_link_libraries(NPKPackerlib PUBLIC lz4::lz4)
+    target_link_libraries(NPKLoader PUBLIC unofficial-sodium::sodium)
+    target_link_libraries(NPKPackerlib PUBLIC unofficial-sodium::sodium)
 
     target_compile_definitions(NPKLoader PRIVATE NPK_BUILD)
     target_compile_definitions(NPKPackerlib PRIVATE NPK_BUILD)
@@ -66,6 +70,7 @@ if(Build_NPK)
         imgui
         NPKLoader
         NPKPackerlib
+        unofficial-sodium::sodium
     )
 
 endif()
@@ -75,6 +80,6 @@ if(Build_NPKUnpacker)
 
     target_include_directories(NPKUnpacker PUBLIC include)
 
-    target_link_libraries(NPKUnpacker PUBLIC lz4::lz4)
+    target_link_libraries(NPKUnpacker PUBLIC lz4::lz4 unofficial-sodium::sodium)
 
 endif()

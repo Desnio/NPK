@@ -123,14 +123,17 @@ NPK::NPK(std::string pak_dir)
                     sizeof(file.archivepathsize));
         offset += sizeof(file.archivepathsize);
 
-        file.path.resize(file.pathsize);
-        std::memcpy(file.path.data(), data + offset, file.path.size());
-        offset += file.path.size();
+        std::string path_temp;
+        path_temp.resize(file.pathsize);
+        std::memcpy(path_temp.data(), data + offset, path_temp.size());
+        offset += path_temp.size();
+        file.path = path_temp;
 
-        file.archivepath.resize(file.archivepathsize);
-        std::memcpy(file.archivepath.data(), data + offset,
-                    file.archivepath.size());
-        offset += file.archivepath.size();
+        std::string archive_temp;
+        archive_temp.resize(file.archivepathsize);
+        std::memcpy(archive_temp.data(), data + offset, archive_temp.size());
+        offset += archive_temp.size();
+        file.archivepath = archive_temp;
 
         bool archiveExists = false;
         for(auto &archive : archives)
@@ -184,6 +187,18 @@ NPK::LoadFile(std::string filePath)
     }
 
     return {};
+}
+
+void
+NPK::unload_File(std::string path)
+{
+    for(auto &file : files)
+    {
+        if(file.path == path)
+        {
+            file.data.resize(0);
+        }
+    }
 }
 
 #ifndef NPK_BUILD

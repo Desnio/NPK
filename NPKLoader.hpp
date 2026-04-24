@@ -36,8 +36,8 @@ struct file
     uint32_t originalsize;
     uint16_t pathsize;
     uint16_t archivepathsize;
-    std::string path;
-    std::string archivepath;
+    std::filesystem::path path;
+    std::filesystem::path archivepath;
     std::vector<char> data;
     const char* archiveptr;
     bool loaded = false;
@@ -53,6 +53,8 @@ public:
     
     std::vector<archive>* get_Archives() {return &archives;};
     std::vector<file>* get_Files() {return &files;};
+    
+    void unload_File(std::string path);
 
 private:
 	void mapFile(const std::string& archivepath);

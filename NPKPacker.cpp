@@ -31,12 +31,17 @@ readFile(const std::filesystem::path &path)
     return buffer;
 }
 
-void
+int
 packFolder(const std::filesystem::path &folderPath,
            const std::filesystem::path &root_Path, int compression_level,
            int max_archive_size)
 {
-    std::cout << folderPath.generic_string() << std::endl;
+    if(sodium_init() < 0)
+    {
+        std::cout << "Failed to initialise libsodium";
+        return -1;
+    }
+
     max_archive_size *= 1000 * 1000;
 
     std::vector<FileEntry> files;
@@ -44,19 +49,18 @@ packFolder(const std::filesystem::path &folderPath,
     uint64_t archivesize;
     uint16_t archives = 0;
 
-    std::string archivesStr = "Pak_" + std::to_string(archives) + ".npk";
+    std::filesystem::path archivesPath
+        = "Pak_" + std::to_string(archives) + ".npk";
 
-    std::ofstream of(folderPath.generic_string() + "/" + archivesStr,
-                     std::ios::binary);
+    std::ofstream of(folderPath / archivesPath, std::ios::binary);
     for(auto &entry :
         std::filesystem::recursive_directory_iterator(folderPath))
     {
-        std::cout << entry.path().generic_string() << std::endl;
         if(!entry.is_regular_file() || entry.path().filename() == ".DS_Store")
             continue;
 
         auto relative = std::filesystem::relative(entry.path(), ".");
-        std::string relativeStr = relative.generic_string();
+        std::filesystem::path rel = root_Path / relative;
 
         auto dataUncompressed = readFile(entry.path());
 
@@ -71,8 +75,8 @@ packFolder(const std::filesystem::path &folderPath,
 
         if(result < 0)
         {
-            std::cerr << "failed to compress file: " << relativeStr
-                      << std::endl;
+            std::cerr << "failed to compress file: "
+                      << relative.generic_string() << std::endl;
             continue;
         }
 
@@ -84,12 +88,12 @@ packFolder(const std::filesystem::path &folderPath,
 
         file.size = result;
         file.originalsize = dataUncompressed.size();
-        file.pathsize = relativeStr.size();
-        file.path = relativeStr;
+        file.pathsize = rel.generic_string().size();
+        file.path = rel.generic_string();
 
         file.offset = of.tellp();
-        file.archivepath = archivesStr;
-        file.archivepathsize = archivesStr.size();
+        file.archivepath = archivesPath.generic_string();
+        file.archivepathsize = archivesPath.generic_string().size();
 
         of.write(data.data(), data.size());
 
@@ -97,20 +101,19 @@ packFolder(const std::filesystem::path &folderPath,
         {
             of.close();
             archives++;
-            archivesStr = "Pak_" + std::to_string(archives) + ".npk";
+            archivesPath = "Pak_" + std::to_string(archives) + ".npk";
 
-            of.open(folderPath.generic_string() + '/' + archivesStr,
-                    std::ios::binary);
+            of.open(folderPath / archivesPath, std::ios::binary);
 
             if(!of.is_open())
             {
-                std::cout << "failed to make archive: " + archivesStr;
+                std::cout << "failed to make archive: "
+                                 + archivesPath.generic_string();
             }
         }
     }
 
-    std::ofstream Pak_dir(folderPath.generic_string() + '/' + "Pak_dir.npk",
-                          std::ios::binary);
+    std::ofstream Pak_dir(folderPath / "Pak_dir.npk", std::ios::binary);
 
     auto size = files.size();
     Pak_dir.write(reinterpret_cast<const char *>(&size), sizeof(size));
@@ -131,6 +134,8 @@ packFolder(const std::filesystem::path &folderPath,
         std::cout << file.path << std::endl;
         Pak_dir.write(file.archivepath.data(), file.archivepath.size());
     }
+
+    return 0;
 }
 
 #ifndef NPK_BUILD
