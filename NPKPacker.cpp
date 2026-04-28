@@ -1,6 +1,6 @@
 #include "NPKPacker.hpp"
 
-std::vector<char>
+std::vector<unsigned char>
 readFile(const std::filesystem::path &path)
 {
     std::ifstream file(path, std::ios::binary);
@@ -20,9 +20,9 @@ readFile(const std::filesystem::path &path)
         return {};
     }
 
-    std::vector<char> buffer(size);
+    std::vector<unsigned char> buffer(size);
 
-    if(!file.read(buffer.data(), size))
+    if(!file.read(reinterpret_cast<char *>(buffer.data()), size))
     {
         std::cerr << "Failed to read file: " << path << std::endl;
         return {};
@@ -67,11 +67,13 @@ packFolder(const std::filesystem::path &folderPath,
         if(dataUncompressed.empty())
             continue;
 
-        std::vector<char> data(LZ4_compressBound(dataUncompressed.size()));
+        std::vector<unsigned char> data(
+            LZ4_compressBound(dataUncompressed.size()));
 
-        int result = LZ4_compress_HC(dataUncompressed.data(), data.data(),
-                                     dataUncompressed.size(), data.size(),
-                                     compression_level);
+        int result = LZ4_compress_HC(
+            reinterpret_cast<char *>(dataUncompressed.data()),
+            reinterpret_cast<char *>(data.data()), dataUncompressed.size(),
+            data.size(), compression_level);
 
         if(result < 0)
         {
@@ -95,7 +97,7 @@ packFolder(const std::filesystem::path &folderPath,
         file.archivepath = archivesPath.generic_string();
         file.archivepathsize = archivesPath.generic_string().size();
 
-        of.write(data.data(), data.size());
+        of.write(reinterpret_cast<char *>(data.data()), data.size());
 
         if(of.tellp() > max_archive_size)
         {

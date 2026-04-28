@@ -97,7 +97,7 @@ main()
                 }
 
                 std::ofstream of(file.path);
-                of.write(data->data(), data->size());
+                of.write(reinterpret_cast<char *>(data->data()), data->size());
                 of.close();
             }
             std::cout << files->size() << std::endl;

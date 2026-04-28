@@ -19,7 +19,7 @@ struct FileEntry {
     std::string archivepath;
 };
 
-std::vector<char> readFile(const std::filesystem::path &path);
+std::vector<unsigned char> readFile(const std::filesystem::path &path);
 
 int
 packFolder(const std::filesystem::path &folderPath,

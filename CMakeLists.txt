@@ -1,5 +1,15 @@
 cmake_minimum_required(VERSION 3.20)
 
+if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    if(DEFINED ENV{VCPKG_ROOT})
+        set(CMAKE_TOOLCHAIN_FILE
+            "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+            CACHE STRING "")
+    else()
+        message(FATAL_ERROR "VCPKG_ROOT is not set")
+    endif()
+endif()
+
 project(NPK LANGUAGES CXX C)
 
 option(Build_NPK "Build renderer" ON)

@@ -155,7 +155,7 @@ NPK::NPK(std::string pak_dir)
 
 NPK::~NPK() { unMap(); }
 
-std::vector<char> *
+std::vector<unsigned char> *
 NPK::LoadFile(std::string filePath)
 {
     for(auto &file : files)
@@ -171,11 +171,12 @@ NPK::LoadFile(std::string filePath)
             std::memcpy(file.data.data(), file.archiveptr + file.offset,
                         file.data.size());
 
-            std::vector<char> decompData(file.originalsize);
+            std::vector<unsigned char> decompData(file.originalsize);
 
-            int result
-                = LZ4_decompress_safe(file.data.data(), decompData.data(),
-                                      file.data.size(), file.originalsize);
+            int result = LZ4_decompress_safe(
+                reinterpret_cast<char *>(file.data.data()),
+                reinterpret_cast<char *>(decompData.data()), file.data.size(),
+                file.originalsize);
 
             file.data.resize(decompData.size());
             file.data = decompData;
@@ -226,7 +227,7 @@ main(int argc, char *argv[])
         }
 
         std::ofstream of(file.path);
-        of.write(data->data(), data->size());
+        of.write(reinterpret_cast<char *>(data->data()), data->size());
         of.close();
     }
 

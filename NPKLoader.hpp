@@ -38,7 +38,7 @@ struct file
     uint16_t archivepathsize;
     std::filesystem::path path;
     std::filesystem::path archivepath;
-    std::vector<char> data;
+    std::vector<unsigned char> data;
     const char* archiveptr;
     bool loaded = false;
 };
@@ -49,7 +49,7 @@ public:
 	NPK(std::string pak_dir);
 	~NPK();
 
-	std::vector<char>* LoadFile(std::string path);
+	std::vector<unsigned char>* LoadFile(std::string path);
     
     std::vector<archive>* get_Archives() {return &archives;};
     std::vector<file>* get_Files() {return &files;};
