@@ -1,13 +1,18 @@
+#pragma once
+
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <memory>
+#include <cstring>
 
 #include "lz4.h"
 #include "lz4hc.h"
 
 #include "sodium.h"
+#include "sodium/crypto_aead_aegis256.h"
 
 struct FileEntry {
     uint64_t offset;
@@ -24,4 +29,4 @@ std::vector<unsigned char> readFile(const std::filesystem::path &path);
 int
 packFolder(const std::filesystem::path &folderPath,
            const std::filesystem::path &root_Path, int compression_level,
-           int max_archive_size);
+           int max_archive_size, bool encrypt, unsigned char* key);

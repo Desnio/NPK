@@ -6,8 +6,14 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <memory>
 
 #include "lz4.h"
+
+
+#include "sodium.h"
+#include "sodium/crypto_aead_aegis256.h"
+
 
 #ifdef _WIN32
 
@@ -39,14 +45,13 @@ struct file
     std::filesystem::path path;
     std::filesystem::path archivepath;
     std::vector<unsigned char> data;
-    const char* archiveptr;
     bool loaded = false;
 };
 
 class NPK
 {
 public:
-	NPK(std::string pak_dir);
+	NPK(std::string pak_dir, bool encrypt, unsigned char* key);
 	~NPK();
 
 	std::vector<unsigned char>* LoadFile(std::string path);
@@ -59,6 +64,9 @@ public:
 private:
 	void mapFile(const std::string& archivepath);
 	void unMap();
+    void un_map_file(std::string& file_path);
 	std::vector<archive> archives;
 	std::vector<file> files;
+
+    std::unique_ptr<unsigned char[]> unencrypted;
 };

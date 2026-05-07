@@ -10,86 +10,58 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     endif()
 endif()
 
-project(NPK LANGUAGES CXX C)
+option(CLI "Compile to archive from the terminal" ON)
+option(FULLCLI "Compile to unarchive from the terminal" ON)
 
-option(Build_NPK "Build renderer" ON)
-option(Build_NPKPacker "Build packer tool" ON)
-option(Build_NPKUnpacker "Build unpacker" ON)
+project(RPK LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_STANDARD 99)
 
 find_package(lz4 CONFIG REQUIRED)
 find_package(unofficial-sodium CONFIG REQUIRED)
 
-if(Build_NPKPacker)
+add_library(RPK STATIC)
 
-    add_executable(NPKPacker NPKPacker.cpp)
-
-    target_include_directories(NPKPacker PUBLIC include)
-
-    target_link_libraries(NPKPacker PUBLIC lz4::lz4)
-    target_link_libraries(NPKPacker PUBLIC unofficial-sodium::sodium)
-
-endif()
-
-if(Build_NPK)
-
-    find_package(glfw3 CONFIG REQUIRED)
-    find_package(OpenGL REQUIRED)
-
-    add_library(glad STATIC src/external/glad.c)
-    set_target_properties(glad PROPERTIES LINKER_LANGUAGE C)
-
-    add_library(imgui STATIC
-        src/external/imgui.cpp
-        src/external/imgui_demo.cpp
-        src/external/imgui_draw.cpp
-        src/external/imgui_impl_glfw.cpp
-        src/external/imgui_impl_opengl3.cpp
-        src/external/imgui_stdlib.cpp
-        src/external/imgui_tables.cpp
-        src/external/imgui_widgets.cpp
-    )
+target_sources(RPK 
+    PRIVATE 
+     src/RPKPacker.cpp 
+     src/RPKLoader.cpp
     
-    add_library(NPKLoader STATIC NPKLoader.cpp)
-    add_library(NPKPackerlib STATIC NPKPacker.cpp)
+    PUBLIC
+     FILE_SET HEADERS
+     FILES
+      include/RPKPacker.hpp
+      include/RPKLoader.hpp
+  )
 
-    target_include_directories(NPKLoader PUBLIC include)
-    target_include_directories(NPKPackerlib PUBLIC include)
-    target_include_directories(imgui PUBLIC include)
-    target_include_directories(glad PUBLIC include)
+target_link_libraries(RPK PUBLIC lz4::lz4 unofficial-sodium::sodium)
+target_include_directories(RPK PUBLIC include)
 
-    target_link_libraries(imgui PUBLIC glfw)
-    target_link_libraries(NPKLoader PUBLIC lz4::lz4)
-    target_link_libraries(NPKPackerlib PUBLIC lz4::lz4)
-    target_link_libraries(NPKLoader PUBLIC unofficial-sodium::sodium)
-    target_link_libraries(NPKPackerlib PUBLIC unofficial-sodium::sodium)
+if(CLI)
+    add_executable(Packer)
 
-    target_compile_definitions(NPKLoader PRIVATE NPK_BUILD)
-    target_compile_definitions(NPKPackerlib PRIVATE NPK_BUILD)
-
-    add_executable(NPK NPK.cpp)
-
-    target_include_directories(NPK PUBLIC include)
-
-    target_link_libraries(NPK PUBLIC
-        OpenGL::GL
-        glfw
-        glad
-        imgui
-        NPKLoader
-        NPKPackerlib
-        unofficial-sodium::sodium
+    target_sources(Packer
+        PRIVATE
+         src/RPKPacker.cpp
     )
 
+    target_link_libraries(Packer lz4::lz4 unofficial-sodium::sodium)
+
+    target_compile_definitions(Packer PRIVATE CLI)
+    target_include_directories(Packer PUBLIC include)
 endif()
 
-if(Build_NPKUnpacker)
-    add_executable(NPKUnpacker NPKLoader.cpp)
+if(FULLCLI)
+    add_executable(Unpacker)
 
-    target_include_directories(NPKUnpacker PUBLIC include)
+    target_sources(Unpacker
+        PRIVATE
+         src/RPKLoader.cpp
+     )
 
-    target_link_libraries(NPKUnpacker PUBLIC lz4::lz4 unofficial-sodium::sodium)
+     target_link_libraries(Unpacker lz4::lz4 unofficial-sodium::sodium)
 
+     target_compile_definitions(Unpacker PRIVATE CLI)
+
+     target_include_directories(Unpacker PUBLIC include)
 endif()
